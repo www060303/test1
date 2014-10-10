@@ -1,0 +1,21 @@
+Windows在启动屏幕保护程序前会向当前激活的应用程序发WM_SYSCOMMAND消息，其中wParam参数指定了即将执行的系统命令类型，值SC_SCREENSAVE表明这个消息为屏幕保护启动，拦截这个消息并return即可阻止启动屏幕保护，而值SC_MONITORPOWER为显示器节电自动关闭的消息，同理可return。下面为程序开启后，阻止系统这两个动作的代码。
+;为示例窗口类添加消息响应函数WM_SYSCOMMAND
+void CSample::OnSysCommand(UINT nID, LPARAM lParam) 
+{
+      if (nID == SC_SCREENSAVE || nID == SC_MONITORPOWER) 
+      {
+            return;
+      }
+      CSkinDialog::OnSysCommand(nID, lParam);
+}
+      操作系统发送给窗体的消息送给WindowProc虚函数所截获，其中参数message为WM_POWERBROADCAST时，表明系统开始电源处理方面消息通知。第二个参数PBT_APMQUERYSUSPEND则是待机，休眠的请求，过滤掉这个消息，就可以阻止系统进入待机或休眠等模式。下面是示例代码：
+;为示例窗口类添加虚函数WindowProc
+LRESULT CSample::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+       // TODO: Add your specialized code here and/or call the base class
+       if (message == WM_POWERBROADCAST && wParam == PBT_APMQUERYSUSPEND)
+       {
+             return BROADCAST_QUERY_DENY;
+       }
+       return CSkinDialog::WindowProc(message, wParam, lParam);
+}
